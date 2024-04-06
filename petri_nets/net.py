@@ -11,14 +11,14 @@ class Place:
     """ Class definition of a place in Petri net. """
 
     identifier : int = None
-    tokens : list[int] = []
+    token_count : int = 0
 
     def __init__(self, identifier : int) -> None:
         self.identifier = identifier
-        self.tokens : list[int] = []
+        self.token_count = 0
 
     def __str__(self) -> None:
-        return 'Place {} ({} tokens)'.format(self.identifier, len(self.tokens))
+        return 'Place {} ({} tokens)'.format(self.identifier, self.token_count)
 
 
 class Transition:
@@ -38,8 +38,9 @@ class Transition:
         return 'Transition {}'.format(self.identifier)
 
     def fire(self) -> None:
-        if self.fire_condition(len(self.input_place.tokens)):
-            self.output_place.tokens.append(self.input_place.tokens.pop())
+        if self.fire_condition(self.input_place.token_count):
+            self.output_place.token_count += 1
+            self.input_place.token_count -= 1
 
     def set_fire_condition(self, condition : FunctionType) -> None:
         self.fire_condition = condition
@@ -100,6 +101,6 @@ class Net:
             print('{} -> {}'.format(transition.input_place, transition))
             print('{} -> {}'.format(transition, transition.output_place))
 
-    def fire(self) -> None:
+    def step(self) -> None:
         for transition in self.transitions[::-1]:
             transition.fire()
