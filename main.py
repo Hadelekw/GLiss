@@ -15,7 +15,7 @@ def main() -> None:
     arcs = []
     for i in range(N):
         arcs.append(Arc(i, 1, places[(i + 1) // 2],
-                    transitions[i // 2],
+                        transitions[i // 2],
                         ArcDirection({0: 'input', 1: 'output'}[i % 2])))
     net = Net(places, transitions, arcs)
 

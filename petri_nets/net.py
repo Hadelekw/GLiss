@@ -27,12 +27,10 @@ class Transition:
     identifier : int = None
     input_place : Place = None
     output_place : Place = None
-    fire_condition : FunctionType = lambda self, x: x == 1
-    firing : bool = False
+    fire_condition : FunctionType = lambda self,x: x == 1
 
     def __init__(self, identifier : int) -> None:
         self.identifier = identifier
-        self.firing : bool = False
 
     def __str__(self) -> None:
         return 'Transition {}'.format(self.identifier)
