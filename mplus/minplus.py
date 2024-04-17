@@ -2,13 +2,19 @@
  This file contains the definition of (min, +) algebra operations and constants.
 """
 
+import math
+
 from enum import Enum
 from numbers import Number
 
 
 class MinPlusConst(Enum):
-    IDENTITY_UNIT_ADD = ''   # it will be named after the consonant
-    IDENTITY_UNIT_MULT = ''  # it will be named after the consonant
+    """
+     Constants for (min, +) algebra.
+     They are named after the notation.
+    """
+    ZERO_ELEMENT = 'tau'  # tau = inf
+    IDENTITY_ELEMENT = 'e'  # e = zero
 
 
 def minplus_add(*args : Number):

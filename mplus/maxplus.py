@@ -2,13 +2,19 @@
  This file contains the definition of (max, +) algebra operations and constants.
 """
 
+import math
+
 from enum import Enum
 from numbers import Number
 
 
 class MaxPlusConst(Enum):
-    IDENTITY_UNIT_ADD = ''   # it will be named after the consonant
-    IDENTITY_UNIT_MULT = ''  # it will be named after the consonant
+    """ 
+     Constants for (max, +) algebra.
+     They are named after the notation.
+    """
+    ZERO_ELEMENT = 'tau'  # tau = -inf
+    IDENTITY_ELEMENT = 'e'  # e = zero
 
 
 def maxplus_add(*args : Number):
