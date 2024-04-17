@@ -4,6 +4,7 @@
 """
 
 from petri_nets import *
+from mplus import *
 
 
 def main() -> None:
@@ -25,6 +26,23 @@ def main() -> None:
         print('step {}'.format(step))
         net.print_connections()
         net.step()
+
+    A = [
+        [1, 2, 2, 2],
+        [3, 4, -4, 4],
+        [5, -6, 6, -6]
+    ]
+    B = [
+        [2, 1, -2],
+        [0, 3, 2],
+        [1, -1, 1],
+    ]
+    C = [
+        [5, 1, 5, 1],
+        [-2, 8, 8, 8],
+        [0, 1, 7, 7],
+    ]
+    print(minplus_add_matrices(maxplus_mult_matrices(A, B), C))
 
 
 if __name__ == '__main__':
