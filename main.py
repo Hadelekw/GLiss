@@ -1,32 +1,24 @@
+import math
 import numpy as np
 
 from mplus import *
+from solver import *
+
+
+TAU = math.inf
 
 
 def main() -> None:
     A = np.array([
-        [1, 2],
-        [3, 4],
-        [5, 6]
+        [0, 5, TAU, TAU, TAU, TAU],
+        [5, 0, 10, 15, TAU, TAU],
+        [TAU, 10, 0, TAU, 15, TAU],
+        [TAU, 15, TAU, 0, 20, TAU],
+        [TAU, TAU, 15, 20, 0, 5],
+        [TAU, TAU, TAU, TAU, 5, 0],
     ])
-    B = np.array([
-        [3, 4, 5],
-        [1, 2, 6]
-    ])
-    C = minplus.mult_matrices(A, B)
-    print(C)
-
-    a = 10
-    t = 8
-    print(minplus.modulo(a, t))
-
-    A = np.array([
-        [0, 2, 3],
-        [1, 0, 3],
-        [3, 8, 0]
-    ])
-    C = minplus.power_matrix(A, 5)
-    print(C)
+    x_0 = np.transpose(np.array([[0, TAU, TAU, TAU, TAU, TAU]]))
+    print(no_signal_solve(A, 4, 5, x_0))
 
 
 if __name__ == '__main__':
