@@ -17,8 +17,7 @@ def main() -> None:
         [TAU, TAU, 15, 20, 0, 5],
         [TAU, TAU, TAU, TAU, 5, 0],
     ])
-    x_0 = np.transpose(np.array([[0, TAU, TAU, TAU, TAU, TAU]]))
-    print(no_signal_solve(A, 4, 5, x_0))
+    print(no_signal_solve(A, 4))
 
 
 if __name__ == '__main__':
