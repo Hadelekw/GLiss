@@ -27,5 +27,25 @@ def no_signal_solve(A : np.ndarray,
 def signal_solve(A : np.ndarray,
                  T : np.ndarray,
                  R : np.ndarray,
-                 P : np.ndarray) -> float:
-    pass
+                 P : np.ndarray,
+                 x_0_0 : int = 0,
+                 x_0 : np.ndarray = None) -> float:
+    if A.shape[0] != T.shape[0] or T.shape[1] != 1:
+        raise ValueError('Signal_solve: T matrix is not a proper Nx1 vector.')
+    if A.shape != R.shape:
+        raise ValueError('Signal_solve: R matrix is not NxN like A matrix.')
+    if A.shape != P.shape:
+        raise ValueError('Signal_solve: P matrix is not NxN like A matrix.')
+    if x_0 is None:
+        _ = [x_0_0,]
+        _.extend([math.inf for _ in range(A.shape[0] - 1)])
+        x_0 = np.transpose(np.array([_]))
+    e = np.transpose(np.array([[0 for _ in range(A.shape[0])]]))
+    x_k = x_0
+    for _ in range(A.shape[0]):
+        C = A + R
+        Z = -(minplus.add_matrices(
+            minplus.modulo_matrices((A + P + minplus.mult_matrices(e, np.transpose(x_k))), T), R))
+        B = C + Z
+        x_k = minplus.mult_matrices(B, x_k)
+    return x_k[A.shape[0] - 1][0]
