@@ -44,6 +44,7 @@ def main() -> None:
         [0, 0, 0, 0, 0, 0],
     ])
     print(signal_solve(A, T, R, P))
+    print(shortest_signal_solve(A, T, R, P, 5))
 
     print('Example 2 results')
     A = np.array([
