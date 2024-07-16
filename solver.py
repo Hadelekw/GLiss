@@ -8,6 +8,7 @@ def no_signal_solve(A : np.ndarray,
                     k_0 : int,
                     x_0_0 : int = 0,
                     x_0 : np.ndarray = None) -> float:
+    """ Finds a solution to Green Light problem for system without traffic lights. """
     if A.shape[0] != A.shape[1]:
         raise ValueError('No_signal_solve: matrix A is not square.')
     if x_0 is None:
@@ -25,6 +26,7 @@ def signal_solve(A : np.ndarray,
                  P : np.ndarray,
                  x_0_0 : int = 0,
                  x_0 : np.ndarray = None) -> float:
+    """ Finds a solution to Green Light problem for system with traffic lights. """
     if A.shape[0] != A.shape[1]:
         raise ValueError('No_signal_solve: matrix A is not square.')
     if A.shape[0] != T.shape[0] or T.shape[1] != 1:
@@ -55,6 +57,7 @@ def shortest_signal_solve(A : np.ndarray,
                           k_0 : int,
                           x_0_0 : int = 0,
                           x_0 : np.ndarray = None) -> float:
+    """ Finds a solution to Green Light problem for system with traffic lights via shortest path. """
     if A.shape[0] != A.shape[1]:
         raise ValueError('No_signal_solve: matrix A is not square.')
     if A.shape[0] != T.shape[0] or T.shape[1] != 1:
