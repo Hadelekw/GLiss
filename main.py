@@ -3,6 +3,7 @@ import numpy as np
 
 from mplus import *
 from solver import *
+from generator import *
 
 
 TAU = math.inf
@@ -76,6 +77,13 @@ def main() -> None:
         [0, 0, 0, 0, 0],
     ])
     print(signal_solve(A, T, R, P))
+
+    # TODO:
+    #  1. Write functions for array Source-Sink adjusting (Source = 0th, Sink = nth)
+    #  2. Test the grading function for randomly generated results
+
+    A, T, R, P = generate_random_intersection_system(10)
+    print(shortest_signal_solve(A, T, R, P, 10))
 
 
 if __name__ == '__main__':
