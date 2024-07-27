@@ -43,16 +43,21 @@ def _generate_random_R(A : np.ndarray,
                        min_weight : int = 5,
                        max_weight : int = 50,
                        chance : float = 0.85) -> np.ndarray:
-    result = np.where(np.where(math.inf > A.copy(), 1, 0) > 0, 1, 0)
+    """ Generates a semi-random matrix R based on matrix A. """
+    result = np.where(math.inf > A.copy(), 1, 0)
     for i in range(A.shape[0]):
         for j in range(A.shape[1]):
-            result[i, j] *= random.randint(min_weight, max_weight) if random.random() < chance else 0
+            if i != j:
+                result[i, j] *= random.randint(min_weight, max_weight) if random.random() < chance else 0
+            else:
+                result[i, j] = 0
     return result
 
 
 def _generate_random_P(R : np.ndarray,
                        min_weight : int = 5,
                        max_weight : int = 50) -> np.ndarray:
+    """ Generates a semi-random matrix P based on matrix R. """
     result = np.where(R.copy() > 0, 1, 0)
     for i in range(R.shape[0]):
         for j in range(R.shape[1]):
@@ -62,6 +67,7 @@ def _generate_random_P(R : np.ndarray,
 
 def generate_random_intersection_system(N : int,
                                         log : bool = True) -> tuple[np.ndarray]:
+    """ Generates a semi-random system of intersections given as matrices A, T, R, P. """
     adjacency_list = _generate_random_intersection(N)
     A = _generate_random_A(adjacency_list)
     T = _generate_random_T(N)

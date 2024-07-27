@@ -3,7 +3,7 @@ import numpy as np
 
 from mplus import *
 from solver import *
-from generator import *
+from intersections import *
 
 
 TAU = math.inf
