@@ -18,7 +18,7 @@ def _swap_columns(A : np.ndarray,
     return A
 
 
-def find_sources(A : np.ndarray) -> list[int]:
+def _find_sources(A : np.ndarray) -> list[int]:
     """ 
     We assume that the source in an array may only have one outward connection. 
     We return a list of possible sources based on that assumption. An outward
@@ -58,10 +58,21 @@ def _find_sinks(A : np.ndarray) -> list[int]:
     return result
 
 
-def get_all_variants_A(A : np.ndarray) -> list[np.ndarray]:
-    """ Get all variants of source to sink of the intersection matrix A. """
+def get_all_variants_swaps(A : np.ndarray) -> list[tuple[int, int]]:
+    """ Get all possible pairs of sources and sinks. """
     result = []
     sources = _find_sources(A); sinks = _find_sinks(A)
+    for source in sources:
+        for sink in sinks:
+            result.append((source, sink))
+    return result
+
+
+def get_all_variants_matrix(A : np.ndarray,
+                            sources : list[tuple],
+                            sinks : list[tuple]) -> list[np.ndarray]:
+    """ Get all variant of source to sink of an intersection matrix. """
+    result = []
     A_copy = A.copy()
     n = A.shape[0] - 1
     for source in sources:
@@ -71,4 +82,22 @@ def get_all_variants_A(A : np.ndarray) -> list[np.ndarray]:
             _swap_columns(A_copy, n, sink)
             _swap_rows(A_copy, n, sink)
             result.append(A_copy)
+    return result
+
+
+def get_all_variants_system(A : np.ndarray,
+                            T : np.ndarray,
+                            R : np.ndarray,
+                            P : np.ndarray) -> list[tuple[np.ndarray]]:
+    """
+    Get all variants of source to sink of all intersection matrices.
+    Because matrices A, R, and P have the same shape they get changed in the same way.
+    Matrix T does not change but is included in the return for a full system.
+    """
+    sources = _find_sources(A)
+    sinks = _find_sinks(A)
+    As = get_all_variants_matrix(A, sources, sinks)
+    Rs = get_all_variants_matrix(R, sources, sinks)
+    Ps = get_all_variants_matrix(P, sources, sinks)
+    result = [(As[i], T.copy(), Rs[i], Ps[i]) for i in range(len(As))]
     return result

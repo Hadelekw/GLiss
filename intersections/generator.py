@@ -73,6 +73,4 @@ def generate_random_intersection_system(N : int,
     T = _generate_random_T(N)
     R = _generate_random_R(A)
     P = _generate_random_P(R)
-    for key, matrix in {'A': A, 'T': T, 'R': R, 'P': P}.items():
-        print(key, matrix)
     return A, T, R, P
