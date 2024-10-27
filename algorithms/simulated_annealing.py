@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import math
+import copy
 from typing import Callable
 
 
@@ -9,21 +10,34 @@ def simulated_annealing(initial_system : np.ndarray,
                         initial_temperature : float,
                         cooling_rate : float,
                         number_of_iterations : int) -> float:
-    result = initial_system
+    """
+    Simulated annealing algorithm for improvement of an intersection
+    system given as A, T, R, P matrices. Because we are considering the
+    traffic system to be collision-free, we assume that the times of
+    red light duration (matrix R) are fixed as they would always change
+    to 0 without limitations imposed by collision probability.
+    To be precise, the matrix undergoing changes is matrix P.
+    """
+
+    # Initial values for the initial system
+    result = copy.deepcopy(initial_system)
     value = func(result[0], result[1], result[2], result[3], result[0].shape[0])
     temperature = initial_temperature
 
+    # Initial best results (for improving via annealing)
     best_result = result
     best_value = value
 
     for _ in range(number_of_iterations):
         potential_result = result
-        for matrix in potential_result[1:]:
+        for matrix in (potential_result[1], potential_result[3]):
             for i in range(matrix.shape[0]):
                 for j in range(matrix.shape[1]):
                     if math.inf > matrix[i, j] > 0:
                         matrix[i, j] += random.randint(-1, 1)
         potential_value = func(potential_result[0], potential_result[1], potential_result[2], potential_result[3], potential_result[0].shape[0])
+        if potential_value == math.inf:
+            break
         dv = potential_value - value
         if dv < 0:
             result = potential_result
