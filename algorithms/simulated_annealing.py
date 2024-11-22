@@ -5,6 +5,11 @@ import copy
 from typing import Callable
 
 
+# TODO:
+# 1. Minimum green light duration
+# 2. Multiple green lines consideration
+
+
 def simulated_annealing(initial_system : np.ndarray,
                         func : Callable,
                         initial_temperature : float,
@@ -16,7 +21,7 @@ def simulated_annealing(initial_system : np.ndarray,
     traffic system to be collision-free, we assume that the times of
     red light duration (matrix R) are fixed as they would always change
     to 0 without limitations imposed by collision probability.
-    To be precise, the matrix undergoing changes is matrix P.
+    To be precise, the matrices undergoing changes are matrices T and P.
     """
 
     # Initial values for the initial system
@@ -52,6 +57,7 @@ def simulated_annealing(initial_system : np.ndarray,
             best_result = result
             best_value = value
 
-        temperature *= cooling_rate
+        # temperature *= cooling_rate
+        temperature = initial_temperature * (10 / initial_temperature)**(_ / number_of_iterations)
 
     return best_result, best_value

@@ -81,7 +81,8 @@ def get_all_variants_matrix(A : np.ndarray,
         for sink in sinks:
             _swap_columns(A_copy, n, sink)
             _swap_rows(A_copy, n, sink)
-            result.append(A_copy)
+            if A_copy not in result:  # Removal of unwanted duplicates.
+                result.append(A_copy)
     return result
 
 
