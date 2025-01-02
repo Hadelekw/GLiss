@@ -30,7 +30,7 @@ def signal_solve(A : np.ndarray,
     if A.shape[0] != A.shape[1]:
         raise ValueError('No_signal_solve: matrix A is not square.')
     if A.shape[0] != T.shape[0] or T.shape[1] != 1:
-        raise ValueError('Signal_solve: matrix T is not a proper Nx1 vector.')
+        raise ValueError('Signal_solve: matrix T is not an Nx1 vector.')
     if A.shape != R.shape:
         raise ValueError('Signal_solve: matrix R is not NxN like matrix A.')
     if A.shape != P.shape:
@@ -61,7 +61,7 @@ def shortest_signal_solve(A : np.ndarray,
     if A.shape[0] != A.shape[1]:
         raise ValueError('No_signal_solve: matrix A is not square.')
     if A.shape[0] != T.shape[0] or T.shape[1] != 1:
-        raise ValueError('Signal_solve: matrix T is not a proper Nx1 vector.')
+        raise ValueError('Signal_solve: matrix T is not an Nx1 vector.')
     if A.shape != R.shape:
         raise ValueError('Signal_solve: matrix R is not NxN like matrix A.')
     if A.shape != P.shape:
