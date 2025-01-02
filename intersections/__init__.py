@@ -1,2 +1,2 @@
 from .generator import generate_random_intersection_system
-from .adjusting import get_all_variants_system
+from .adjusting import get_all_variants_system, get_all_variants_swaps

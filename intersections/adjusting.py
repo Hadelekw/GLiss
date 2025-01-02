@@ -2,22 +2,6 @@ import math
 import numpy as np
 
 
-def _swap_rows(A : np.ndarray,
-              row_1 : int,
-              row_2 : int) -> np.ndarray:
-    """ Swaps two rows in an array. """
-    A[[row_1, row_2], :] = A[[row_2, row_1], :]
-    return A
-
-
-def _swap_columns(A : np.ndarray,
-                  column_1 : int,
-                  column_2 : int) -> np.ndarray:
-    """ Swaps two columns in an array. """
-    A[:, [column_1, column_2]] = A[:, [column_2, column_1]]
-    return A
-
-
 def _find_sources(A : np.ndarray) -> list[int]:
     """ 
     We assume that the source in an array may only have one outward connection. 
@@ -64,8 +48,20 @@ def get_all_variants_swaps(A : np.ndarray) -> list[tuple[int, int]]:
     sources = _find_sources(A); sinks = _find_sinks(A)
     for source in sources:
         for sink in sinks:
-            result.append((source, sink))
+            if source != sink:
+                result.append((source, sink))
     return result
+
+
+def _perform_swap(B : np.ndarray, a : int, b : int, A : np.ndarray) -> np.ndarray:
+    """ Performs a swap of indices between a-th and b-th row and column. """
+    B[:, a] = A[:, b]; B[b, a] = B[a, a]
+    B[a, :] = A[b, :]; B[a, b] = B[a, a]
+    B[a, a] = 0
+    B[:, b] = A[:, a]; B[a, b] = B[b, b]
+    B[b, :] = A[a, :]; B[b, a] = B[b, b]
+    B[b, b] = 0
+    return B
 
 
 def get_all_variants_matrix(A : np.ndarray,
@@ -73,16 +69,15 @@ def get_all_variants_matrix(A : np.ndarray,
                             sinks : list[tuple]) -> list[np.ndarray]:
     """ Get all variant of source to sink of an intersection matrix. """
     result = []
-    A_copy = A.copy()
-    n = A.shape[0] - 1
     for source in sources:
-        _swap_columns(A_copy, 0, source)
-        _swap_rows(A_copy, 0, source)
         for sink in sinks:
-            _swap_columns(A_copy, n, sink)
-            _swap_rows(A_copy, n, sink)
-            if A_copy not in result:  # Removal of unwanted duplicates.
-                result.append(A_copy)
+            if source == sink:
+                continue
+            B = A.copy()
+            B = _perform_swap(B, source, 0, A)
+            B = _perform_swap(B, len(B) - 1, sink, A)
+            # if B not in result:  # Removal of unwanted duplicates.
+            result.append(B)
     return result
 
 
