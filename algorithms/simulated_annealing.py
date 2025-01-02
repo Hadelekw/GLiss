@@ -40,7 +40,11 @@ def simulated_annealing(initial_system : np.ndarray,
                 for j in range(matrix.shape[1]):
                     if math.inf > matrix[i, j] > 0:
                         matrix[i, j] += random.randint(-1, 1)
-        potential_value = func(potential_result[0], potential_result[1], potential_result[2], potential_result[3], potential_result[0].shape[0])
+        potential_value = func(potential_result[0],
+                               potential_result[1],
+                               potential_result[2],
+                               potential_result[3],
+                               potential_result[0].shape[0])
         if potential_value == math.inf:
             break
         dv = potential_value - value
