@@ -4,6 +4,8 @@ import math
 import copy
 from typing import Callable
 
+from . import sa_settings as settings
+
 
 # TODO:
 # 1. Minimum green light duration
@@ -35,11 +37,24 @@ def simulated_annealing(initial_system : np.ndarray,
 
     for _ in range(number_of_iterations):
         potential_result = result
-        for matrix in (potential_result[1], potential_result[3]):
-            for i in range(matrix.shape[0]):
-                for j in range(matrix.shape[1]):
-                    if math.inf > matrix[i, j] > 0:
-                        matrix[i, j] += random.randint(-1, 1)
+        for i in range(potential_result[1].shape[0]):
+            for j in range(potential_result[1].shape[1]):
+                if potential_result[1][i, j] != math.inf:
+                    _value = potential_result[1][i, j] + random.randint(-1, 1)
+                    if _value > settings.MIN_T_VALUE:
+                        potential_result[1][i, j] = _value
+        for i in range(potential_result[2].shape[0]):
+            for j in range(potential_result[2].shape[1]):
+                if potential_result[0][i, j] > 0 and potential_result[0][i, j] != math.inf:
+                    _value = potential_result[2][i, j] + random.randint(-1, 1)
+                    if _value > settings.MIN_R_VALUE:
+                        potential_result[2][i, j] = _value
+        for i in range(potential_result[3].shape[0]):
+            for j in range(potential_result[3].shape[1]):
+                if potential_result[0][i, j] > 0 and potential_result[0][i, j] != math.inf:
+                    _value = potential_result[3][i, j] + random.randint(-1, 1)
+                    if _value > settings.MIN_P_VALUE:
+                        potential_result[3][i, j] = _value
         potential_value = func(potential_result[0],
                                potential_result[1],
                                potential_result[2],

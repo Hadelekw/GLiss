@@ -1,0 +1,4 @@
+
+MIN_T_VALUE = 5
+MIN_R_VALUE = 5
+MIN_P_VALUE = 0

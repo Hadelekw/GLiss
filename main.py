@@ -1,5 +1,6 @@
 import math
 import sys
+import time
 import xml.etree.ElementTree as et
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,6 +14,8 @@ from algorithms import *
 def main() -> None:
 
     mode = sys.argv[1]
+
+    t = time.time()
 
     if mode == '--graphml':
         file_path = sys.argv[2]
@@ -64,11 +67,33 @@ def main() -> None:
                     base_system[0][base_system[0] == 0] = math.inf
                     base_system[0][base_system[0] == 1] = 0
                 for k, value in enumerate(values):
-                    base_system[j][i % matrix_size, k] = int(value) if value != 'inf' else math.inf
+                    base_system[j][i % matrix_size, k] = int(value) if value not in ['inf', 't'] else math.inf
 
-    annealing_result, annealing_score = simulated_annealing(base_system, shortest_signal_solve, 100, 0.9, 1000)
-    for system in get_all_variants_system(*annealing_result):
-        print(shortest_signal_solve(*system, system[0].shape[0]))
+    variants = {variant: [] for variant in get_all_variants_swaps(base_system[0])}
+    best_results = {'system': [], 'average_score': math.inf}
+
+    for _ in range(10):
+        print('Iteration #{}'.format(_))
+        annealing_result, annealing_score = simulated_annealing(base_system, shortest_signal_solve, 100, 0.9, 100)
+        average_score = 0
+        for variant, system in zip(variants.keys(), get_all_variants_system(*annealing_result)):
+            score = shortest_signal_solve(*system, system[0].shape[0])
+            variants[variant].append(score)
+            average_score += score
+        average_score /= len(variants)
+        print(average_score)
+        if average_score < best_results['average_score']:
+            best_results['system'] = annealing_result
+            best_results['average_score'] = average_score
+    print(time.time() - t)
+    print(best_results['system'])
+    print(best_results['average_score'])
+    for variant, scores in variants.items():
+        counts, bins = np.histogram(scores, bins=tuple(set(scores)))
+        plt.stairs(counts, bins)
+        plt.hist(bins[:-1], bins, alpha=0.5, weights=counts, label=str(variant))
+    plt.legend(loc='upper right')
+    plt.show()
 
 
 if __name__ == '__main__':
