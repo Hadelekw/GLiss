@@ -72,9 +72,12 @@ def main() -> None:
     variants = {variant: [] for variant in get_all_variants_swaps(base_system[0])}
     best_results = {'system': [], 'average_score': math.inf}
 
-    for _ in range(10):
+    annealing_result, annealing_score = simulated_annealing(base_system, shortest_signal_solve, 100, 0.9, 100)
+
+    for _ in range(100):
         print('Iteration #{}'.format(_))
-        annealing_result, annealing_score = simulated_annealing(base_system, shortest_signal_solve, 100, 0.9, 100)
+        if _ > 0:
+            annealing_result, annealing_score = simulated_annealing(best_results['system'], shortest_signal_solve, 100, 0.9, 1000)
         average_score = 0
         for variant, system in zip(variants.keys(), get_all_variants_system(*annealing_result)):
             score = shortest_signal_solve(*system, system[0].shape[0])
@@ -89,7 +92,7 @@ def main() -> None:
     print(best_results['system'])
     print(best_results['average_score'])
     for variant, scores in variants.items():
-        counts, bins = np.histogram(scores, bins=tuple(set(scores)))
+        counts, bins = np.histogram(scores, bins=tuple(set([round(score) for score in scores])))
         plt.stairs(counts, bins)
         plt.hist(bins[:-1], bins, alpha=0.5, weights=counts, label=str(variant))
     plt.legend(loc='upper right')
