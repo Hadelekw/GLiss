@@ -53,7 +53,6 @@ def main() -> None:
             for i, line in enumerate(f):
                 values = line.split()
                 if not i % matrix_size:
-                    print(values)
                     j += 1
                 if not base_system and not i:
                     j = 0
@@ -69,27 +68,34 @@ def main() -> None:
                 for k, value in enumerate(values):
                     base_system[j][i % matrix_size, k] = int(value) if value not in ['inf', 't'] else math.inf
 
+    iterations = int(sys.argv[3])
+    sa_temperature = int(sys.argv[4])
+    sa_iterations = int(sys.argv[5])
+
     variants = {variant: [] for variant in get_all_variants_swaps(base_system[0])}
     best_results = {'system': [], 'average_score': math.inf}
 
-    annealing_result, annealing_score = simulated_annealing(base_system, shortest_signal_solve, 100, 0.9, 100)
+    annealing_result, annealing_score = simulated_annealing(base_system, shortest_signal_solve, sa_temperature, 0.9, sa_iterations)
 
-    for _ in range(100):
+    for _ in range(iterations):
         print('Iteration #{}'.format(_))
         if _ > 0:
-            annealing_result, annealing_score = simulated_annealing(best_results['system'], shortest_signal_solve, 100, 0.9, 1000)
+            annealing_result, annealing_score = simulated_annealing(base_system, shortest_signal_solve, sa_temperature, 0.9, sa_iterations)
         average_score = 0
         for variant, system in zip(variants.keys(), get_all_variants_system(*annealing_result)):
             score = shortest_signal_solve(*system, system[0].shape[0])
             variants[variant].append(score)
             average_score += score
         average_score /= len(variants)
+        average_score = round(average_score, 2)
         print(average_score)
         if average_score < best_results['average_score']:
             best_results['system'] = annealing_result
             best_results['average_score'] = average_score
-    print(time.time() - t)
-    print(best_results['system'])
+    print('Runtime: {runtime}'.format(runtime=time.time() - t))
+    for matrix in best_results['system']:
+        print(matrix)
+    # print(best_results['system'])
     print(best_results['average_score'])
     for variant, scores in variants.items():
         counts, bins = np.histogram(scores, bins=tuple(set([round(score) for score in scores])))
