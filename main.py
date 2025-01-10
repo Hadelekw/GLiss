@@ -1,7 +1,6 @@
 import math
 import sys
 import time
-import xml.etree.ElementTree as et
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -9,78 +8,64 @@ from mplus import *
 from solver import *
 from intersections import *
 from algorithms import *
+from load_file import load_graphml, load_atrp
 
 
 def main() -> None:
 
+    args = sys.argv
+    args = args[3:]
+    paired_args = {args[i][1:]: args[i + 1] for i in range(0, len(args), 2)}
+    mappings = {
+        'iterations': (int, ['iterations', 'i']),
+        'sa_temperature': (float, ['sa_temperature', 'sat']),
+        'cooling_rate': (float, ['cooling_rate', 'sa_cooling_rate', 'cr', 'sacr']),
+        'sa_iterations': (int, ['sa_iterations', 'sai']),
+        'output': (str, ['output', 'o']),
+    }
+    settings = {
+        'iterations': 100,
+        'sa_temperature': 100,
+        'cooling_rate': 0.9,
+        'sa_iterations': 100,
+        'output': 'result.atrp'
+    }
+    for key, (func, values) in mappings.items():
+        for value in values:
+            if value in paired_args.keys():
+                settings[key] = func(paired_args[value])
+
     mode = sys.argv[1]
+    file_path = sys.argv[2]
+
+    if mode == 'graphml':
+        base_system = load_graphml(file_path)
+    if mode == 'atrp':
+        base_system = load_atrp(file_path)
 
     t = time.time()
-
-    if mode == '--graphml':
-        file_path = sys.argv[2]
-        f = open(file_path, 'r')
-        root = et.parse(f).getroot()
-        # if len(root) != 4:
-        #     raise ValueError('The given GraphML file does not contain all 4 graphs.')
-        values = {key: {'nodes': [], 'edges': []} for key in ('A', 'T', 'R', 'P')}
-        for child in root:
-            if child.tag[-5:] == 'graph':
-                graph_id = child.attrib['id']
-                for grandchild in child:
-                    if grandchild.tag[-4:] == 'node':
-                        values[graph_id]['nodes'].append(grandchild.attrib['id'])
-                    if grandchild.tag[-4:] == 'edge':
-                        values[graph_id]['edges'].append((grandchild.attrib['source'],
-                                                          grandchild.attrib['target'],
-                                                          grandchild.attrib['weight']))
-        for key, value in values.items():
-            if key == 'A':
-                pass
-            if key == 'T':
-                pass
-            if key == 'R':
-                pass
-            if key == 'P':
-                pass
-        return
-
-    if mode == '--atrp':
-        file_path = sys.argv[2]
-        base_system = []
-        with open(file_path, 'r') as f:
-            j = 0; matrix_size = 1
-            for i, line in enumerate(f):
-                values = line.split()
-                if not i % matrix_size:
-                    j += 1
-                if not base_system and not i:
-                    j = 0
-                    matrix_size = len(values)
-                    base_system = [
-                        np.eye(matrix_size, matrix_size),
-                        np.ones((matrix_size, 1)),
-                        np.zeros((matrix_size, matrix_size)),
-                        np.zeros((matrix_size, matrix_size))
-                    ]
-                    base_system[0][base_system[0] == 0] = math.inf
-                    base_system[0][base_system[0] == 1] = 0
-                for k, value in enumerate(values):
-                    base_system[j][i % matrix_size, k] = int(value) if value not in ['inf', 't'] else math.inf
-
-    iterations = int(sys.argv[3])
-    sa_temperature = int(sys.argv[4])
-    sa_iterations = int(sys.argv[5])
 
     variants = {variant: [] for variant in get_all_variants_swaps(base_system[0])}
     best_results = {'system': [], 'average_score': math.inf}
 
-    annealing_result, annealing_score = simulated_annealing(base_system, shortest_signal_solve, sa_temperature, 0.9, sa_iterations)
+    annealing_result, annealing_score = simulated_annealing(
+        base_system,
+        shortest_signal_solve,
+        settings['sa_temperature'],
+        settings['cooling_rate'],
+        settings['sa_iterations']
+    )
 
-    for _ in range(iterations):
+    for _ in range(settings['iterations']):
         print('Iteration #{}'.format(_))
         if _ > 0:
-            annealing_result, annealing_score = simulated_annealing(base_system, shortest_signal_solve, sa_temperature, 0.9, sa_iterations)
+            annealing_result, annealing_score = simulated_annealing(
+                base_system,
+                shortest_signal_solve,
+                settings['sa_temperature'],
+                settings['cooling_rate'],
+                settings['sa_iterations']
+            )
         average_score = 0
         for variant, system in zip(variants.keys(), get_all_variants_system(*annealing_result)):
             score = shortest_signal_solve(*system, system[0].shape[0])
@@ -95,8 +80,13 @@ def main() -> None:
     print('Runtime: {runtime}'.format(runtime=time.time() - t))
     for matrix in best_results['system']:
         print(matrix)
-    # print(best_results['system'])
     print(best_results['average_score'])
+    with open(settings['output'], 'w') as f:
+        for matrix in best_results['system']:
+            for i in range(matrix.shape[0]):
+                for j in range(matrix.shape[1]):
+                    f.write(str(matrix[i, j]) + ' ')
+                f.write('\n')
     for variant, scores in variants.items():
         counts, bins = np.histogram(scores, bins=tuple(set([round(score) for score in scores])))
         plt.stairs(counts, bins)
