@@ -42,7 +42,7 @@ def _find_sinks(A : np.ndarray) -> list[int]:
     return result
 
 
-def get_all_variants_swaps(A : np.ndarray) -> list[tuple[int, int]]:
+def get_all_swap_variants(A : np.ndarray) -> list[tuple[int, int]]:
     """ Get all possible pairs of sources and sinks. """
     result = []
     sources = _find_sources(A); sinks = _find_sinks(A)
@@ -64,7 +64,7 @@ def _perform_swap(B : np.ndarray, a : int, b : int, A : np.ndarray) -> np.ndarra
     return B
 
 
-def get_all_variants_matrix(A : np.ndarray,
+def get_all_matrix_variants(A : np.ndarray,
                             sources : list[tuple],
                             sinks : list[tuple]) -> list[np.ndarray]:
     """ Get all variant of source to sink of an intersection matrix. """
@@ -76,12 +76,11 @@ def get_all_variants_matrix(A : np.ndarray,
             B = A.copy()
             B = _perform_swap(B, source, 0, A)
             B = _perform_swap(B, len(B) - 1, sink, A)
-            # if B not in result:  # Removal of unwanted duplicates.
             result.append(B)
     return result
 
 
-def get_all_variants_system(A : np.ndarray,
+def get_all_system_variants(A : np.ndarray,
                             T : np.ndarray,
                             R : np.ndarray,
                             P : np.ndarray) -> list[tuple[np.ndarray]]:
@@ -92,8 +91,8 @@ def get_all_variants_system(A : np.ndarray,
     """
     sources = _find_sources(A)
     sinks = _find_sinks(A)
-    As = get_all_variants_matrix(A, sources, sinks)
-    Rs = get_all_variants_matrix(R, sources, sinks)
-    Ps = get_all_variants_matrix(P, sources, sinks)
+    As = get_all_matrix_variants(A, sources, sinks)
+    Rs = get_all_matrix_variants(R, sources, sinks)
+    Ps = get_all_matrix_variants(P, sources, sinks)
     result = [(As[i], T.copy(), Rs[i], Ps[i]) for i in range(len(As))]
     return result

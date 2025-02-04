@@ -5,66 +5,98 @@ import copy
 from typing import Callable
 
 from . import sa_settings as settings
+from .history import History
+from intersections import get_all_system_variants
 
 
 # TODO:
-# 1. Minimum green light duration
-# 2. Multiple green lines consideration
+# 1. Get all system variants for swaps (so that they can be applied offline).
+# 2. Ability to swap out the cooling function at call.
 
 
 def simulated_annealing(initial_system : np.ndarray,
+                        swaps : list[tuple[int]],
                         func : Callable,
                         initial_temperature : float,
                         cooling_rate : float,
                         number_of_iterations : int) -> float:
     """
     Simulated annealing algorithm for improvement of an intersection
-    system given as A, T, R, P matrices. Because we are considering the
-    traffic system to be collision-free, we assume that the times of
-    red light duration (matrix R) are fixed as they would always change
-    to 0 without limitations imposed by collision probability.
-    To be precise, the matrices undergoing changes are matrices T and P.
+    system given as A, T, R, P matrices.
     """
 
-    # Initial values for the initial system
+    history = History(
+        initial_system,
+        swaps,
+        func,
+        initial_temperature,
+        cooling_rate,
+        number_of_iterations
+    )
+
+    # The values for the initial system
     result = copy.deepcopy(initial_system)
     value = func(result[0], result[1], result[2], result[3], result[0].shape[0])
     temperature = initial_temperature
 
-    # Initial best results (for improving via annealing)
+    # Initial best results (for later improvement via annealing)
     best_result = result
     best_value = value
 
     for _ in range(number_of_iterations):
         potential_result = result
+
+        # Generating the changes to T matrix
         for i in range(potential_result[1].shape[0]):
             for j in range(potential_result[1].shape[1]):
                 if potential_result[1][i, j] != math.inf:
-                    # _value = potential_result[1][i, j] + random.randint(-1, 1)
                     _value = potential_result[1][i, j] + float('{:.2f}'.format(random.random() * random.randint(-1, 1)))
                     if _value > settings.MIN_T_VALUE:
                         potential_result[1][i, j] = _value
+
+        # Generating the changes to R matrix
         for i in range(potential_result[2].shape[0]):
             for j in range(potential_result[2].shape[1]):
                 if potential_result[0][i, j] > 0 and potential_result[0][i, j] != math.inf:
-                    # _value = potential_result[2][i, j] + random.randint(-1, 1)
                     _value = potential_result[2][i, j] + float('{:.2f}'.format(random.random() * random.randint(-1, 1)))
                     if _value > settings.MIN_R_VALUE:
                         potential_result[2][i, j] = _value
+
+        # Generating the changes to P matrix
         for i in range(potential_result[3].shape[0]):
             for j in range(potential_result[3].shape[1]):
                 if potential_result[0][i, j] > 0 and potential_result[0][i, j] != math.inf:
-                    # _value = potential_result[3][i, j] + random.randint(-1, 1)
                     _value = potential_result[3][i, j] + float('{:.2f}'.format(random.random() * random.randint(-1, 1)))
                     if _value > settings.MIN_P_VALUE:
                         potential_result[3][i, j] = _value
-        potential_value = func(potential_result[0],
-                               potential_result[1],
-                               potential_result[2],
-                               potential_result[3],
-                               potential_result[0].shape[0])
+
+        variant_potential_results = get_all_system_variants(
+            potential_result[0],
+            potential_result[1],
+            potential_result[2],
+            potential_result[3]
+        )
+
+        potential_value = 0
+
+        for swap, variant_potential_result in zip(swaps, variant_potential_results):
+            variant_potential_value = func(
+                variant_potential_result[0],
+                variant_potential_result[1],
+                variant_potential_result[2],
+                variant_potential_result[3],
+                variant_potential_result[0].shape[0]
+            )
+            potential_value += variant_potential_value
+            history.variant_potential_values[swap].append(float(variant_potential_value))
+
+        potential_value /= len(swaps)
+        history.potential_values.append(float(potential_value))
+
+        # If the time needed to travel through intersection is infinite
         if potential_value == math.inf:
             break
+
         dv = potential_value - value
         if dv < 0:
             result = potential_result
@@ -79,7 +111,8 @@ def simulated_annealing(initial_system : np.ndarray,
             best_result = result
             best_value = value
 
+        # TODO: Add a way to change the cooling function
         # temperature *= cooling_rate
         temperature = initial_temperature * (10 / initial_temperature)**(_ / number_of_iterations)
 
-    return best_result, best_value
+    return best_result, best_value, history

@@ -4,3 +4,4 @@ venv/
 __pycache__/
 system*
 sketch.py
+result*

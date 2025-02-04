@@ -17,14 +17,12 @@ def main() -> None:
     args = args[3:]
     paired_args = {args[i][1:]: args[i + 1] for i in range(0, len(args), 2)}
     mappings = {
-        'iterations': (int, ['iterations', 'i']),
         'sa_temperature': (float, ['sa_temperature', 'sat']),
         'cooling_rate': (float, ['cooling_rate', 'sa_cooling_rate', 'cr', 'sacr']),
         'sa_iterations': (int, ['sa_iterations', 'sai']),
         'output': (str, ['output', 'o']),
     }
     settings = {
-        'iterations': 100,
         'sa_temperature': 100,
         'cooling_rate': 0.9,
         'sa_iterations': 100,
@@ -45,49 +43,32 @@ def main() -> None:
 
     t = time.time()
 
-    variants = {variant: [] for variant in get_all_variants_swaps(base_system[0])}
-    best_results = {'system': [], 'average_score': math.inf}
+    swaps = get_all_swap_variants(base_system[0])
 
-    annealing_result, annealing_score = simulated_annealing(
+    annealing_result, annealing_score, annealing_history = simulated_annealing(
         base_system,
+        swaps,
         shortest_signal_solve,
         settings['sa_temperature'],
         settings['cooling_rate'],
         settings['sa_iterations']
     )
 
-    for _ in range(settings['iterations']):
-        print('Iteration #{}'.format(_))
-        if _ > 0:
-            annealing_result, annealing_score = simulated_annealing(
-                base_system,
-                shortest_signal_solve,
-                settings['sa_temperature'],
-                settings['cooling_rate'],
-                settings['sa_iterations']
-            )
-        average_score = 0
-        for variant, system in zip(variants.keys(), get_all_variants_system(*annealing_result)):
-            score = shortest_signal_solve(*system, system[0].shape[0])
-            variants[variant].append(score)
-            average_score += score
-        average_score /= len(variants)
-        average_score = round(average_score, 2)
-        print(average_score)
-        if average_score < best_results['average_score']:
-            best_results['system'] = annealing_result
-            best_results['average_score'] = average_score
-    print('Runtime: {runtime}'.format(runtime=time.time() - t))
-    for matrix in best_results['system']:
-        print(matrix)
-    print(best_results['average_score'])
+    print(time.time() - t)
+
+    print(annealing_result, annealing_score)
+
+    print(annealing_history.potential_values)
+    print(annealing_history.variant_potential_values)
+
     with open(settings['output'], 'w') as f:
-        for matrix in best_results['system']:
+        for matrix in annealing_result:
             for i in range(matrix.shape[0]):
                 for j in range(matrix.shape[1]):
-                    f.write(str(matrix[i, j]) + ' ')
+                    f.write('{:.2f} '.format(matrix[i, j]))
                 f.write('\n')
-    for variant, scores in variants.items():
+
+    for variant, scores in annealing_history.variant_potential_values.items():
         counts, bins = np.histogram(scores, bins=tuple(set([round(score) for score in scores])))
         plt.stairs(counts, bins)
         plt.hist(bins[:-1], bins, alpha=0.5, weights=counts, label=str(variant))
