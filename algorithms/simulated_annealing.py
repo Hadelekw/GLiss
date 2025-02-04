@@ -48,7 +48,7 @@ def simulated_annealing(initial_system : np.ndarray,
 
         percentage = (i + 1) / number_of_iterations
         sys.stdout.write('\rProgress: {iteration}/{number_of_iterations} ({percentage:.2%}) [{progress}]'.format(
-            iteration=i,
+            iteration=i + 1,
             number_of_iterations=number_of_iterations,
             percentage=percentage,
             progress=('#' * int(percentage * 20)).ljust(20, '-')
