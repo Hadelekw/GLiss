@@ -55,11 +55,7 @@ def main() -> None:
     )
 
     print(time.time() - t)
-
-    print(annealing_result, annealing_score)
-
-    print(annealing_history.potential_values)
-    print(annealing_history.variant_potential_values)
+    print(annealing_score)
 
     with open(settings['output'], 'w') as f:
         for matrix in annealing_result:

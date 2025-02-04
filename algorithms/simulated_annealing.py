@@ -2,6 +2,7 @@ import numpy as np
 import random
 import math
 import copy
+import sys
 from typing import Callable
 
 from . import sa_settings as settings
@@ -43,7 +44,16 @@ def simulated_annealing(initial_system : np.ndarray,
     best_result = result
     best_value = value
 
-    for _ in range(number_of_iterations):
+    for i in range(number_of_iterations):
+
+        percentage = (i + 1) / number_of_iterations
+        sys.stdout.write('\rProgress: {iteration}/{number_of_iterations} ({percentage:.2%}) [{progress}]'.format(
+            iteration=i,
+            number_of_iterations=number_of_iterations,
+            percentage=percentage,
+            progress=('#' * int(percentage * 20)).ljust(20, '-')
+        ))
+
         potential_result = result
 
         # Generating the changes to T matrix
@@ -51,7 +61,7 @@ def simulated_annealing(initial_system : np.ndarray,
             for j in range(potential_result[1].shape[1]):
                 if potential_result[1][i, j] != math.inf:
                     _value = potential_result[1][i, j] + float('{:.2f}'.format(random.random() * random.randint(-1, 1)))
-                    if _value > settings.MIN_T_VALUE:
+                    if _value > settings.MIN_T_VALUE and _value < settings.MAX_T_VALUE:
                         potential_result[1][i, j] = _value
 
         # Generating the changes to R matrix
@@ -59,7 +69,7 @@ def simulated_annealing(initial_system : np.ndarray,
             for j in range(potential_result[2].shape[1]):
                 if potential_result[0][i, j] > 0 and potential_result[0][i, j] != math.inf:
                     _value = potential_result[2][i, j] + float('{:.2f}'.format(random.random() * random.randint(-1, 1)))
-                    if _value > settings.MIN_R_VALUE:
+                    if _value > settings.MIN_R_VALUE and _value < settings.MAX_R_VALUE:
                         potential_result[2][i, j] = _value
 
         # Generating the changes to P matrix
@@ -67,8 +77,11 @@ def simulated_annealing(initial_system : np.ndarray,
             for j in range(potential_result[3].shape[1]):
                 if potential_result[0][i, j] > 0 and potential_result[0][i, j] != math.inf:
                     _value = potential_result[3][i, j] + float('{:.2f}'.format(random.random() * random.randint(-1, 1)))
-                    if _value > settings.MIN_P_VALUE:
+                    if _value > settings.MIN_P_VALUE and _value < settings.MAX_P_VALUE:
                         potential_result[3][i, j] = _value
+
+        for matrix in potential_result:
+            matrix = np.round(matrix, 2)
 
         variant_potential_results = get_all_system_variants(
             potential_result[0],
@@ -80,17 +93,18 @@ def simulated_annealing(initial_system : np.ndarray,
         potential_value = 0
 
         for swap, variant_potential_result in zip(swaps, variant_potential_results):
-            variant_potential_value = func(
+            variant_potential_value = round(func(
                 variant_potential_result[0],
                 variant_potential_result[1],
                 variant_potential_result[2],
                 variant_potential_result[3],
                 variant_potential_result[0].shape[0]
-            )
+            ), 2)
             potential_value += variant_potential_value
             history.variant_potential_values[swap].append(float(variant_potential_value))
 
         potential_value /= len(swaps)
+        potential_value = round(potential_value, 2)
         history.potential_values.append(float(potential_value))
 
         # If the time needed to travel through intersection is infinite
@@ -113,6 +127,6 @@ def simulated_annealing(initial_system : np.ndarray,
 
         # TODO: Add a way to change the cooling function
         # temperature *= cooling_rate
-        temperature = initial_temperature * (10 / initial_temperature)**(_ / number_of_iterations)
+        temperature = initial_temperature * (10 / initial_temperature)**(i / number_of_iterations)
 
     return best_result, best_value, history

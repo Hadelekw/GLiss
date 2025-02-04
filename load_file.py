@@ -3,6 +3,10 @@ import numpy as np
 import math
 
 
+# TODO:
+# 1. Fix GraphML loading
+
+
 def load_graphml(file_path : str) -> list:
     f = open(file_path, 'r')
     root = et.parse(f).getroot()
