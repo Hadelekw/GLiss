@@ -83,6 +83,8 @@ def simulated_annealing(initial_system : np.ndarray,
         for matrix in potential_result:
             matrix = np.round(matrix, 2)
 
+        history.potential_results.append(potential_result)
+
         variant_potential_results = get_all_system_variants(
             potential_result[0],
             potential_result[1],
