@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from mplus import *
 from solver import *
-from intersections import *
+from intersections import get_all_swap_variants
 from algorithms import *
 from load_file import load_graphml, load_atrp
 
@@ -44,7 +44,6 @@ def main() -> None:
     t = time.time()
 
     swaps = get_all_swap_variants(base_system[0])
-
     annealing_result, annealing_score, annealing_history = simulated_annealing(
         base_system,
         swaps,
@@ -54,8 +53,10 @@ def main() -> None:
         settings['sa_iterations']
     )
 
-    print(time.time() - t)
-    print(annealing_score)
+    print('\nTotal runtime: {runtime:.2f}s'.format(runtime=time.time() - t))
+    print('Best score: {score:.2f}'.format(score=annealing_score))
+
+    annealing_history.dump('results')
 
     with open(settings['output'], 'w') as f:
         for matrix in annealing_result:
@@ -63,13 +64,6 @@ def main() -> None:
                 for j in range(matrix.shape[1]):
                     f.write('{:.2f} '.format(matrix[i, j]))
                 f.write('\n')
-
-    for variant, scores in annealing_history.variant_potential_values.items():
-        counts, bins = np.histogram(scores, bins=tuple(set([round(score) for score in scores])))
-        plt.stairs(counts, bins)
-        plt.hist(bins[:-1], bins, alpha=0.5, weights=counts, label=str(variant))
-    plt.legend(loc='upper right')
-    plt.show()
 
 
 if __name__ == '__main__':
