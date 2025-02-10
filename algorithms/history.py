@@ -54,9 +54,9 @@ class History:
         for i, potential_result in enumerate(self.potential_results):
             with open(directory_path + '/{file_path}.atrp'.format(file_path=i), 'w') as f:
                 for matrix in potential_result:
-                    for i in range(matrix.shape[0]):
-                        for j in range(matrix.shape[1]):
-                            f.write('{:.2f} '.format(matrix[i, j]))
+                    for j in range(matrix.shape[0]):
+                        for k in range(matrix.shape[1]):
+                            f.write('{:.2f} '.format(matrix[j, k]))
                         f.write('\n')
 
 

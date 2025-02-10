@@ -60,7 +60,7 @@ def simulated_annealing(initial_system : np.ndarray,
         for i in range(potential_result[1].shape[0]):
             for j in range(potential_result[1].shape[1]):
                 if potential_result[1][i, j] != math.inf:
-                    _value = potential_result[1][i, j] + float('{:.2f}'.format(random.random() * random.randint(-1, 1)))
+                    _value = potential_result[1][i, j] + random.random() * random.randint(-1, 1)
                     if _value > settings.MIN_T_VALUE and _value < settings.MAX_T_VALUE:
                         potential_result[1][i, j] = _value
 
@@ -68,7 +68,7 @@ def simulated_annealing(initial_system : np.ndarray,
         for i in range(potential_result[2].shape[0]):
             for j in range(potential_result[2].shape[1]):
                 if potential_result[0][i, j] > 0 and potential_result[0][i, j] != math.inf:
-                    _value = potential_result[2][i, j] + float('{:.2f}'.format(random.random() * random.randint(-1, 1)))
+                    _value = potential_result[2][i, j] + random.random() * random.randint(-1, 1)
                     if _value > settings.MIN_R_VALUE and _value < settings.MAX_R_VALUE:
                         potential_result[2][i, j] = _value
 
@@ -76,14 +76,14 @@ def simulated_annealing(initial_system : np.ndarray,
         for i in range(potential_result[3].shape[0]):
             for j in range(potential_result[3].shape[1]):
                 if potential_result[0][i, j] > 0 and potential_result[0][i, j] != math.inf:
-                    _value = potential_result[3][i, j] + float('{:.2f}'.format(random.random() * random.randint(-1, 1)))
+                    _value = potential_result[3][i, j] + random.random() * random.randint(-1, 1)
                     if _value > settings.MIN_P_VALUE and _value < settings.MAX_P_VALUE:
                         potential_result[3][i, j] = _value
 
         for matrix in potential_result:
             matrix = np.round(matrix, 2)
 
-        history.potential_results.append(potential_result)
+        history.potential_results.append(copy.deepcopy(potential_result))
 
         variant_potential_results = get_all_system_variants(
             potential_result[0],
@@ -124,7 +124,7 @@ def simulated_annealing(initial_system : np.ndarray,
                 value = potential_value
 
         if value < best_value:
-            best_result = result
+            best_result = copy.deepcopy(result)
             best_value = value
 
         # TODO: Add a way to change the cooling function
