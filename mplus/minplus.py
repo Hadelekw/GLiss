@@ -46,7 +46,7 @@ def modulo(a : Number, t : int) -> Number:
     if a == math.inf:
         return math.inf
     if a == 0:
-        return -t
+        return 0
     if t == math.inf or t == 0:
         return a
     return a - (a // t) * t

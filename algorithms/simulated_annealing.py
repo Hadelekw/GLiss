@@ -47,11 +47,12 @@ def simulated_annealing(initial_system : np.ndarray,
     for i in range(number_of_iterations):
 
         percentage = (i + 1) / number_of_iterations
-        sys.stdout.write('\rProgress: {iteration}/{number_of_iterations} ({percentage:.2%}) [{progress}]'.format(
+        sys.stdout.write('\rProgress: {iteration}/{number_of_iterations} ({percentage:.2%}) [{progress}] Best score: {score:.2f}'.format(
             iteration=i + 1,
             number_of_iterations=number_of_iterations,
             percentage=percentage,
-            progress=('#' * int(percentage * 20)).ljust(20, '-')
+            progress=('#' * int(percentage * 20)).ljust(20, '-'),
+            score=best_value
         ))
 
         potential_result = result
@@ -69,7 +70,7 @@ def simulated_annealing(initial_system : np.ndarray,
             for j in range(potential_result[2].shape[1]):
                 if potential_result[0][i, j] > 0 and potential_result[0][i, j] != math.inf:
                     _value = potential_result[2][i, j] + random.random() * random.randint(-1, 1)
-                    if _value > settings.MIN_R_VALUE and _value < settings.MAX_R_VALUE:
+                    if potential_result[1][i, 0] - _value > settings.MIN_GREEN_LIGHT_LENGTH and _value > settings.MIN_R_VALUE:
                         potential_result[2][i, j] = _value
 
         # Generating the changes to P matrix
