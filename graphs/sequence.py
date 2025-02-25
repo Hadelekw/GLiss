@@ -1,3 +1,9 @@
+"""
+ Generates a diagram showing the vehicle's movement between red lights.
+ This is a very rough version of this graph which works only for specific data.
+"""
+
+
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,9 +11,10 @@ import sys
 
 import labels
 
+sys.path.append('../')
 from mplus import *
 from load_file import load_atrp
-from intersections import get_all_system_variants
+from intersections import get_all_system_variants, get_all_swap_variants
 
 
 COLORS = ['r', 'b', 'm', 'g', 'k', 'y', 'k']
@@ -36,20 +43,29 @@ def modified_shortest_signal_solve(A : np.ndarray,
     x_k = x_0
     Bs = []
     C = A + R
+    x_k_size = sum(x_k < math.inf)[0]
+    former_x_k = x_k.copy()
+    order = []
     for _ in range(k_0 - 1):
         Z = -minplus.add_matrices(minplus.modulo_matrices(A + P + minplus.mult_matrices(e, np.transpose(x_k)), T), R)
         B = C + Z
-        Bs.append(B)
+        Bs.append(B.copy())
         x_k = minplus.mult_matrices(B, x_k)
+        if sum(x_k < math.inf) - x_k_size > 1:
+            order.append(int(np.where(np.isclose(x_k, np.min(x_k[int(x_k_size):int(sum(x_k < math.inf)[0])])))[0][0]))
+        else:
+            try:
+                order.append(int(np.where(x_k != former_x_k)[0][0]))
+            except:
+                pass
+        x_k_size = sum(x_k < math.inf)[0]
+        former_x_k = x_k.copy()
+    order = [0] + order
     Bj = Bs[0]
     for B in Bs[1:]:
-        Bj = minplus.mult_matrices(Bj, B)
+        Bj = minplus.mult_matrices(B, Bj)
     result = minplus.mult_matrices(Bj, x_0)
-    order = []
-    partition = np.partition(result, result.shape[0] - 1, axis=0)
-    for _ in range(result.shape[0]):
-        i = np.where(np.isclose(result, partition[_]))[0]
-        order.append(int(i[0]))
+    result = {i: float(result[i][0]) for i in order}
     return result, order
 
 
@@ -65,9 +81,9 @@ def main() -> None:
         base_system[3]
     )
 
-    swaps = [(0, 5), (5, 0)]
+    swaps = get_all_swap_variants(base_system[0])
 
-    figure, axes = plt.subplots(1, 2)
+    figure, axes = plt.subplots(1, len(swaps))
     for i, (swap, system) in enumerate(zip(swaps, variant_systems)):
         exits, order = modified_shortest_signal_solve(
             system[0],
@@ -76,45 +92,50 @@ def main() -> None:
             system[3],
             system[0].shape[0]
         )
+
         axes[i].set_aspect('equal')
-        axes[i].set_xlim([0, np.max(exits)])
-        axes[i].set_ylim([0, np.max(exits)])
+        axes[i].set_xlim([0, max(exits.values())])
+        axes[i].set_ylim([0, max(exits.values())])
         axes[i].set_ylabel(labels.SEQUENCE_Y_LABEL)
-        print([str(_) for _ in order])
-        axes[i].set_xticks([_[0] for _ in exits], [str(_) for _ in order], fontsize=14)
         axes[i].set_xlabel(labels.SEQUENCE_X_LABEL)
-        lines = {float(_exit[0]): [] for _exit in np.sort(exits, axis=0)}
-        for j in range(1, len(exits)):
-            Tj = float(base_system[1][j][0])
-            Rj = base_system[2][j, j - 1]
-            Pj = base_system[3][j, j - 1]
-            if Rj > 0:
+
+        accumulates = [0]
+        accumulate = 0
+        for j, k in zip(order[1:], order[:-1]):
+            accumulate += system[0][j, k]
+            accumulates.append(accumulate)
+            Tj = float(system[1][j][0])
+            Rj = system[2][j, k]
+            Pj = system[3][j, k]
+            axes[i].vlines(
+                accumulate,
+                0,
+                max(exits.values()),
+                color='k',
+                linewidth=0.5,
+                linestyles=(0, (5, 10))
+            )
+            for l in range(-1, 10):
                 axes[i].vlines(
-                    exits[j],
-                    0,
-                    np.max(exits),
-                    color='k',
-                    linewidth=0.5,
-                    linestyles=(0, (5, 10))
-                )
-            for k in range(-1, 10):
-                lines[exits[j][0]].append((Tj * k - Pj, Tj * k - Pj + Rj))
-                axes[i].vlines(
-                    exits[j],
-                    Tj * k - Pj,
-                    Tj * k - Pj + Rj,
+                    accumulate,
+                    Tj * l - Pj,
+                    Tj * l - Pj + Rj,
                     color='k',
                     linewidth=5
                 )
-        delay = 0
-        exits = np.sort(exits, axis=0)
-        for j in range(len(exits[1:]) + 1):
-            for (ymin, ymax) in lines[exits[j - 1][0]]:
-                if exits[j - 1] + delay < ymax and exits[j - 1] + delay > ymin:
-                    delay = float(ymax - exits[j - 1][0])
+
+        axes[i].set_xticks(
+            [_ for _ in accumulates],
+            [swap[0]] + [str(_) for _ in order[1:-1]] + [swap[1]],
+            fontsize=14
+        )
+
+        for (prev_accumulate, next_accumulate), (prev_exit, next_exit) in zip(
+                zip(accumulates[:-1], accumulates[1:]),
+                zip(list(exits.values())[:-1], list(exits.values())[1:])):
             axes[i].plot(
-                range(int(exits[j - 1][0]), int(exits[j][0] + 1)),
-                [_ + delay for _ in range(int(exits[j - 1][0]), int(exits[j][0] + 1))],
+                [prev_accumulate, next_accumulate],
+                [prev_exit, next_accumulate if next_accumulate != accumulates[-1] else next_exit],
                 color='k'
             )
 

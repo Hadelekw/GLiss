@@ -34,22 +34,13 @@ def main() -> None:
 
     if mode == 'variant_distribution':
         for i, (variant, scores) in enumerate(variant_potential_values.items()):
-            counts, bins = np.histogram(scores, bins=tuple(set([round(score) for score in scores])))
+            counts, bins = np.histogram(scores, bins=tuple(set([int(score) for score in scores])))
             plt.stairs(counts, bins)
             plt.hist(bins[:-1], bins, weights=counts, label=str(variant), edgecolor=COLORS[i], facecolor=COLORS[i], alpha=0.5)
         plt.xlabel(labels.VARIANT_DISTRIBUTION_X_LABEL)
         plt.ylabel(labels.VARIANT_DISTRIBUTION_Y_LABEL)
         plt.legend(loc='upper right')
-    elif mode == 'variant_probability':
-        for i, (variant, scores) in enumerate(variant_potential_values.items()):
-            counts, bins = np.histogram(scores, bins=tuple(set([round(score) for score in scores])))
-            counts = counts.astype('float64')
-            counts /= np.max(counts)
-            plt.stairs(counts, bins)
-            plt.hist(bins[:-1], bins, weights=counts, label=str(variant), edgecolor=COLORS[i], facecolor=COLORS[i], alpha=0.5)
-        plt.xlabel(labels.VARIANT_PROBABILITY_X_LABEL)
-        plt.ylabel(labels.VARIANT_PROBABILITY_Y_LABEL)
-        plt.legend(loc='upper right')
+
     elif mode == 'variant_evolution':
         iterations = [i for i in range(len(potential_values))]
         for i, (variant, scores) in enumerate(variant_potential_values.items()):
@@ -58,6 +49,7 @@ def main() -> None:
         plt.xlabel(labels.VARIANT_EVOLUTION_X_LABEL)
         plt.ylabel(labels.VARIANT_EVOLUTION_Y_LABEL)
         plt.legend(loc='upper right')
+
     elif mode == 'limited_variant_evolution':
         limit = int(sys.argv[3])
         iterations = range(limit)
