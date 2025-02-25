@@ -82,5 +82,5 @@ def shortest_signal_solve(A : np.ndarray,
         x_k = minplus.mult_matrices(B, x_k)
     Bj = Bs[0]
     for B in Bs[1:]:
-        Bj = minplus.mult_matrices(Bj, B)
+        Bj = minplus.mult_matrices(B, Bj)
     return (minplus.mult_matrices(Bj, x_0))[A.shape[0] - 1][0]
