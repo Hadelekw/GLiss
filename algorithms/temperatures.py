@@ -80,7 +80,7 @@ def temperature_update_k(initial_temperature : float,
     return initial_temperature * math.exp(-(step/total_steps)**2 * math.log(initial_temperature/final_temperature))
 
 
-FUNCTION_MAP = {
+TEMPERATURE_UPDATE_MAP = {
     'a': temperature_update_a,
     'b': temperature_update_b,
     'c': temperature_update_c,
@@ -98,12 +98,18 @@ FUNCTION_MAP = {
 def main(method_identifier : str) -> None:
     values = range(101)
     if method_identifier == 'all':
-        for func in list(FUNCTION_MAP.values())[1:]:
-            plt.plot(values, [math.exp(-1/func(100, 1, v, 100)) for v in values], label=func.__name__[-1])
+        for i, func in enumerate(list(TEMPERATURE_UPDATE_MAP.values())):
+            if not i:
+                plt.plot(values, [math.exp(-1/func(100, 0.9)) for v in values], label=func.__name__[-1])
+            else:
+                plt.plot(values, [math.exp(-1/func(100, 1, v, 100)) for v in values], label=func.__name__[-1])
         plt.legend()
     else:
-        func = FUNCTION_MAP[method_identifier]
-        plt.plot(values, [math.exp(-1/func(100, 1, v, 100)) for v in values])
+        func = TEMPERATURE_UPDATE_MAP[method_identifier]
+        if method_identifier == 'a':
+            plt.plot(values, [math.exp(-1/func(100, 0.9)) for v in values])
+        else:
+            plt.plot(values, [math.exp(-1/func(100, 1, v, 100)) for v in values])
     plt.show()
 
 

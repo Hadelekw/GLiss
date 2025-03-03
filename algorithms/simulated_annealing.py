@@ -5,22 +5,21 @@ import copy
 import sys
 from typing import Callable
 
-from . import sa_settings as settings
-from .history import History
 from intersections import get_all_system_variants
 
-
-# TODO:
-# 1. Get all system variants for swaps (so that they can be applied offline).
-# 2. Ability to swap out the cooling function at call.
+from . import sa_settings as settings
+from .history import History
+from .temperatures import TEMPERATURE_UPDATE_MAP
 
 
 def simulated_annealing(initial_system : np.ndarray,
                         swaps : list[tuple[int]],
                         func : Callable,
-                        initial_temperature : float,
-                        cooling_rate : float,
-                        number_of_iterations : int) -> float:
+                        temperature_update_method_identifier : str = settings.TEMPERATURE_UPDATE_METHOD_IDENTIFIER,
+                        initial_temperature : float = settings.INITIAL_TEMPERATURE,
+                        cooling_rate : float = settings.COOLING_RATE,
+                        final_temperature : int = settings.FINAL_TEMPERATURE,
+                        number_of_iterations : int = settings.NUMBER_OF_ITERATIONS) -> float:
     """
     Simulated annealing algorithm for improvement of an intersection
     system given as A, T, R, P matrices.
@@ -128,8 +127,9 @@ def simulated_annealing(initial_system : np.ndarray,
             best_result = copy.deepcopy(result)
             best_value = value
 
-        # TODO: Add a way to change the cooling function
-        # temperature *= cooling_rate
-        temperature = initial_temperature * (10 / initial_temperature)**(i / number_of_iterations)
+        if temperature_update_method_identifier == 'a':
+            temperature = TEMPERATURE_UPDATE_MAP[temperature_update_method_identifier](temperature, cooling_rate)
+        else:
+            temperature = TEMPERATURE_UPDATE_MAP[temperature_update_method_identifier](initial_temperature, final_temperature, i, number_of_iterations)
 
     return best_result, best_value, history
