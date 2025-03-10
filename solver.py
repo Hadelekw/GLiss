@@ -28,7 +28,7 @@ def signal_solve(A : np.ndarray,
                  x_0 : np.ndarray = None) -> float:
     """ Finds a solution to Green Light problem for system with traffic lights. """
     if A.shape[0] != A.shape[1]:
-        raise ValueError('No_signal_solve: matrix A is not square.')
+        raise ValueError('Signal_solve: matrix A is not square.')
     if A.shape[0] != T.shape[0] or T.shape[1] != 1:
         raise ValueError('Signal_solve: matrix T is not an Nx1 vector.')
     if A.shape != R.shape:
@@ -59,13 +59,13 @@ def shortest_signal_solve(A : np.ndarray,
                           x_0 : np.ndarray = None) -> float:
     """ Finds a solution to Green Light problem for system with traffic lights via shortest path. """
     if A.shape[0] != A.shape[1]:
-        raise ValueError('No_signal_solve: matrix A is not square.')
+        raise ValueError('Shortest_signal_solve: matrix A is not square.')
     if A.shape[0] != T.shape[0] or T.shape[1] != 1:
-        raise ValueError('Signal_solve: matrix T is not an Nx1 vector.')
+        raise ValueError('Shortest_ignal_solve: matrix T is not an Nx1 vector.')
     if A.shape != R.shape:
-        raise ValueError('Signal_solve: matrix R is not NxN like matrix A.')
+        raise ValueError('Shortest_signal_solve: matrix R is not NxN like matrix A.')
     if A.shape != P.shape:
-        raise ValueError('Signal_solve: matrix P is not NxN like matrix A.')
+        raise ValueError('Shortest_signal_solve: matrix P is not NxN like matrix A.')
     if x_0 is None:
         _ = [x_0_0,]
         _.extend([math.inf for _ in range(A.shape[0] - 1)])
