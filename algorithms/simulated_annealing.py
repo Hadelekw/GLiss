@@ -60,7 +60,7 @@ def simulated_annealing(initial_system : np.ndarray,
         for i in range(potential_result[1].shape[0]):
             for j in range(potential_result[1].shape[1]):
                 if potential_result[1][i, j] != math.inf:
-                    _value = potential_result[1][i, j] + random.random() * random.randint(-1, 1)
+                    _value = potential_result[1][i, j] + random.random() * random.randint(-1, 1) * random.randint(1, 5)
                     if _value > settings.MIN_T_VALUE and _value < settings.MAX_T_VALUE:
                         potential_result[1][i, j] = _value
 
@@ -68,7 +68,7 @@ def simulated_annealing(initial_system : np.ndarray,
         for i in range(potential_result[2].shape[0]):
             for j in range(potential_result[2].shape[1]):
                 if potential_result[0][i, j] > 0 and potential_result[0][i, j] != math.inf:
-                    _value = potential_result[2][i, j] + random.random() * random.randint(-1, 1)
+                    _value = potential_result[2][i, j] + random.random() * random.randint(-1, 1) * random.randint(1, 5)
                     if potential_result[1][i, 0] - _value > settings.MIN_GREEN_LIGHT_LENGTH and _value > settings.MIN_R_VALUE:
                         potential_result[2][i, j] = _value
 
@@ -76,12 +76,12 @@ def simulated_annealing(initial_system : np.ndarray,
         for i in range(potential_result[3].shape[0]):
             for j in range(potential_result[3].shape[1]):
                 if potential_result[0][i, j] > 0 and potential_result[0][i, j] != math.inf:
-                    _value = potential_result[3][i, j] + random.random() * random.randint(-1, 1)
+                    _value = potential_result[3][i, j] + random.random() * random.randint(-1, 1) * random.randint(1, 5)
                     if _value > settings.MIN_P_VALUE and _value < settings.MAX_P_VALUE:
                         potential_result[3][i, j] = _value
 
         for matrix in potential_result:
-            matrix = np.round(matrix, 2)
+            matrix = np.round(matrix, settings.DECIMAL_PLACES)
 
         history.potential_results.append(copy.deepcopy(potential_result))
 
@@ -95,21 +95,25 @@ def simulated_annealing(initial_system : np.ndarray,
         potential_value = 0
 
         for swap, variant_potential_result in zip(swaps, variant_potential_results):
-            variant_potential_value = round(func(
-                variant_potential_result[0],
-                variant_potential_result[1],
-                variant_potential_result[2],
-                variant_potential_result[3],
-                variant_potential_result[0].shape[0]
-            ), 2)
+            variant_potential_value = 0
+            for starting_point in settings.STARTING_POINTS:
+                variant_potential_value += round(func(
+                    variant_potential_result[0],
+                    variant_potential_result[1],
+                    variant_potential_result[2],
+                    variant_potential_result[3],
+                    variant_potential_result[0].shape[0],
+                    starting_point
+                ), 2)
+            variant_potential_value /= len(settings.STARTING_POINTS)
             potential_value += variant_potential_value
             history.variant_potential_values[swap].append(float(variant_potential_value))
 
         potential_value /= len(swaps)
-        potential_value = round(potential_value, 2)
+        potential_value = round(potential_value, settings.DECIMAL_PLACES)
         history.potential_values.append(float(potential_value))
 
-        # If the time needed to travel through intersection is infinite
+        # Skip if the time needed to travel through intersection is infinite
         if potential_value == math.inf:
             break
 
