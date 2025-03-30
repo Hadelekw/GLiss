@@ -63,6 +63,10 @@ def simulated_annealing(initial_system : np.ndarray,
                     _value = potential_result[1][i, j] + random.random() * random.randint(-1, 1) * random.randint(1, 5)
                     if _value > settings.MIN_T_VALUE and _value < settings.MAX_T_VALUE:
                         potential_result[1][i, j] = _value
+                    elif _value < settings.MIN_T_VALUE:
+                        potential_result[1][i, j] = settings.MIN_T_VALUE
+                    else:
+                        potential_result[1][i, j] = settings.MAX_T_VALUE
 
         # Generating the changes to R matrix
         for i in range(potential_result[2].shape[0]):
@@ -71,6 +75,8 @@ def simulated_annealing(initial_system : np.ndarray,
                     _value = potential_result[2][i, j] + random.random() * random.randint(-1, 1) * random.randint(1, 5)
                     if potential_result[1][i, 0] - _value > settings.MIN_GREEN_LIGHT_LENGTH and _value > settings.MIN_R_VALUE:
                         potential_result[2][i, j] = _value
+                    elif _value < settings.MIN_R_VALUE:
+                        potential_result[2][i, j] = settings.MIN_R_VALUE
 
         # Generating the changes to P matrix
         for i in range(potential_result[3].shape[0]):
@@ -79,6 +85,10 @@ def simulated_annealing(initial_system : np.ndarray,
                     _value = potential_result[3][i, j] + random.random() * random.randint(-1, 1) * random.randint(1, 5)
                     if _value > settings.MIN_P_VALUE and _value < settings.MAX_P_VALUE:
                         potential_result[3][i, j] = _value
+                    elif _value < settings.MIN_P_VALUE:
+                        potential_result[3][i, j] = settings.MIN_P_VALUE
+                    else:
+                        potential_result[3][i, j] = settings.MAX_P_VALUE
 
         for matrix in potential_result:
             matrix = np.round(matrix, settings.DECIMAL_PLACES)
@@ -96,7 +106,7 @@ def simulated_annealing(initial_system : np.ndarray,
 
         for swap, variant_potential_result in zip(swaps, variant_potential_results):
             variant_potential_value = 0
-            for starting_point in settings.STARTING_POINTS:
+            for starting_point in settings.STARTING_TIMES:
                 variant_potential_value += round(func(
                     variant_potential_result[0],
                     variant_potential_result[1],
@@ -105,7 +115,7 @@ def simulated_annealing(initial_system : np.ndarray,
                     variant_potential_result[0].shape[0],
                     starting_point
                 ), 2)
-            variant_potential_value /= len(settings.STARTING_POINTS)
+            variant_potential_value /= len(settings.STARTING_TIMES)
             potential_value += variant_potential_value
             history.variant_potential_values[swap].append(float(variant_potential_value))
 
