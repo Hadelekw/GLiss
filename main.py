@@ -13,6 +13,8 @@ from load_file import load_graphml, load_atrp
 def main() -> None:
     mode = sys.argv[1]
     file_path = sys.argv[2]
+    results_path = sys.argv[3]
+    starting_times = [float(value) for value in sys.argv[4].split(',')]
 
     if mode == 'graphml':
         base_system = load_graphml(file_path)
@@ -25,15 +27,16 @@ def main() -> None:
     annealing_result, annealing_score, annealing_history = simulated_annealing(
         base_system,
         swaps,
-        shortest_signal_solve
+        shortest_signal_solve,
+        starting_times=starting_times
     )
 
     print('\nTotal runtime: {runtime:.2f}s'.format(runtime=time.time() - t))
     print('Best score: {score:.2f}'.format(score=annealing_score))
 
-    annealing_history.dump('results/results')
+    annealing_history.dump(results_path)
 
-    with open('results/result.atrp', 'w') as f:
+    with open(results_path + '/result.atrp', 'w') as f:
         for matrix in annealing_result:
             for i in range(matrix.shape[0]):
                 for j in range(matrix.shape[1]):

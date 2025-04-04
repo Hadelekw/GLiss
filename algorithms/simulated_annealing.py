@@ -19,7 +19,8 @@ def simulated_annealing(initial_system : np.ndarray,
                         initial_temperature : float = settings.INITIAL_TEMPERATURE,
                         cooling_rate : float = settings.COOLING_RATE,
                         final_temperature : int = settings.FINAL_TEMPERATURE,
-                        number_of_iterations : int = settings.NUMBER_OF_ITERATIONS) -> float:
+                        number_of_iterations : int = settings.NUMBER_OF_ITERATIONS,
+                        starting_times : list[float] = settings.STARTING_TIMES) -> float:
     """
     Simulated annealing algorithm for improvement of an intersection
     system given as A, T, R, P matrices.
@@ -106,7 +107,7 @@ def simulated_annealing(initial_system : np.ndarray,
 
         for swap, variant_potential_result in zip(swaps, variant_potential_results):
             variant_potential_value = 0
-            for starting_point in settings.STARTING_TIMES:
+            for starting_point in starting_times:
                 variant_potential_value += round(func(
                     variant_potential_result[0],
                     variant_potential_result[1],
@@ -115,7 +116,7 @@ def simulated_annealing(initial_system : np.ndarray,
                     variant_potential_result[0].shape[0],
                     starting_point
                 ), 2)
-            variant_potential_value /= len(settings.STARTING_TIMES)
+            variant_potential_value /= len(starting_times)
             potential_value += variant_potential_value
             history.variant_potential_values[swap].append(float(variant_potential_value))
 
