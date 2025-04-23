@@ -74,8 +74,16 @@ def get_all_matrix_variants(A : np.ndarray,
             if source == sink:
                 continue
             B = A.copy()
-            B = _perform_swap(B, source, 0, A)
-            B = _perform_swap(B, len(B) - 1, sink, A)
+            if sink == 0:
+                B = _perform_swap(B, len(B) - 1, sink, A)
+                B = _perform_swap(B, source, 0, A)
+            elif source == 0:
+                B = _perform_swap(B, len(B) - 1, sink, A)
+            elif sink == len(B) - 1:
+                B = _perform_swap(B, source, 0, A)
+            else:
+                B = _perform_swap(B, source, 0, A)
+                B = _perform_swap(B, len(B) - 1, sink, A)
             result.append(B)
     return result
 
