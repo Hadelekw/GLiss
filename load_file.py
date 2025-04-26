@@ -55,3 +55,15 @@ def load_atrp(file_path : str) -> list:
             for k, value in enumerate(values):
                 base_system[j][i % matrix_size, k] = float(value) if value not in ['inf', 't'] else math.inf
     return base_system
+
+
+def save_transposed(initial_file_path : str, file_path : str):
+    base_system = load_atrp(initial_file_path)
+    with open(file_path, 'w') as f:
+        for matrix in base_system:
+            if matrix.shape[0] == matrix.shape[1]:
+                matrix = matrix.T
+            for i in range(matrix.shape[0]):
+                for j in range(matrix.shape[1]):
+                    f.write('{:.2f} '.format(matrix[i, j]))
+                f.write('\n')

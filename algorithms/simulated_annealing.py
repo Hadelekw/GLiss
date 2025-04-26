@@ -124,7 +124,7 @@ def simulated_annealing(initial_system : np.ndarray,
         potential_value = round(potential_value, settings.DECIMAL_PLACES)
         history.potential_values.append(float(potential_value))
 
-        # Skip if the time needed to travel through intersection is infinite
+        # Skip if the average time needed to travel through the intersection system is infinite
         if potential_value == math.inf:
             break
 
