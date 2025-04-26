@@ -4,40 +4,58 @@ import numpy as np
 
 def _find_sources(A : np.ndarray) -> list[int]:
     """ 
-    We assume that the source in an array may only have one outward connection. 
+    We assume that the source in an array may only have one outward connection
+    and at most one inward connection.
     We return a list of possible sources based on that assumption. An outward
     connection is defined via columns of the matrix.
     """
     result = []
     for j in range(A.shape[1]):
-        count = 0
+        inward_count = 0
+        for value in A[j, :]:
+            if math.inf > value > 0:
+                inward_count += 1
+            if inward_count > 1:
+                break
+        if inward_count > 1:
+            continue
+        outward_count = 0
         for value in A[:, j]:
             if math.inf > value > 0:
-                count += 1
-            if count > 1:
+                outward_count += 1
+            if outward_count > 1:
                 break
         else:
-            if count:
+            if outward_count:
                 result.append(j)
     return result
 
 
 def _find_sinks(A : np.ndarray) -> list[int]:
     """
-    We assume that the sink in an array may only have one inward connection.
+    We assume that the sink in an array may only have one inward connection
+    and at most one outward connection.
     We return a list of possible sinks based on that assumption. An inward
     connection is defined via rows of the matrix.
     """
     result = []
     for i in range(A.shape[0]):
-        count = 0
+        outward_count = 0
+        for value in A[:, i]:
+            if math.inf > value > 0:
+                outward_count += 1
+            if outward_count > 1:
+                break
+        if outward_count > 1:
+            continue
+        inward_count = 0
         for value in A[i, :]:
             if math.inf > value > 0:
-                count += 1
-            if count > 1:
+                inward_count += 1
+            if inward_count > 1:
                 break
         else:
-            if count:
+            if inward_count:
                 result.append(i)
     return result
 
