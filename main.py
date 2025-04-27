@@ -14,7 +14,8 @@ def main() -> None:
     mode = sys.argv[1]
     file_path = sys.argv[2]
     results_path = sys.argv[3]
-    starting_times = [float(value) for value in sys.argv[4].split(',')]
+    starting_times = sys.argv[4]
+    starting_times = [float(value) for value in starting_times.split(',')]
 
     if mode == 'graphml':
         base_system = load_graphml(file_path)
