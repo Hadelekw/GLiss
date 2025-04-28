@@ -8,6 +8,7 @@ import math
 
 
 def load_graphml(file_path : str) -> list:
+    """ Loads a GraphML file with proper formatting. """
     f = open(file_path, 'r')
     root = et.parse(f).getroot()
     # if len(root) != 4:
@@ -36,6 +37,7 @@ def load_graphml(file_path : str) -> list:
 
 
 def load_atrp(file_path : str) -> list:
+    """ Loads an ATRP file. """
     base_system = []
     with open(file_path, 'r') as f:
         j = 0; matrix_size = 1
@@ -57,12 +59,15 @@ def load_atrp(file_path : str) -> list:
     return base_system
 
 
-def save_transposed(initial_file_path : str, file_path : str):
+def load_and_save_transposed(initial_file_path : str, file_path : str):
+    """ Load an ATRP file, transpose it, and save it to another file. """
     base_system = load_atrp(initial_file_path)
     with open(file_path, 'w') as f:
         for matrix in base_system:
             if matrix.shape[0] == matrix.shape[1]:
                 matrix = matrix.T
+            else:
+                matrix = matrix[::-1]
             for i in range(matrix.shape[0]):
                 for j in range(matrix.shape[1]):
                     f.write('{:.2f} '.format(matrix[i, j]))
