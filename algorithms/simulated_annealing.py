@@ -3,6 +3,7 @@ import random
 import math
 import copy
 import sys
+import concurrent.futures
 from typing import Callable
 
 from intersections import get_all_system_variants
@@ -105,22 +106,38 @@ def simulated_annealing(initial_system : np.ndarray,
 
         potential_value = 0
 
-        for swap, variant_potential_result in zip(swaps, variant_potential_results):
-            variant_potential_value = 0
-            for starting_point in starting_times:
-                variant_potential_value += round(func(
-                    variant_potential_result[0],
-                    variant_potential_result[1],
-                    variant_potential_result[2],
-                    variant_potential_result[3],
-                    variant_potential_result[0].shape[0],
-                    starting_point
-                ), 2)
-            variant_potential_value /= len(starting_times)
-            potential_value += variant_potential_value
-            history.variant_potential_values[swap].append(float(variant_potential_value))
+        # for swap, variant_potential_result in zip(swaps, variant_potential_results):
+        #     variant_potential_value = 0
+        #     for starting_point in starting_times:
+        #         variant_potential_value += round(func(
+        #             variant_potential_result[0],
+        #             variant_potential_result[1],
+        #             variant_potential_result[2],
+        #             variant_potential_result[3],
+        #             variant_potential_result[0].shape[0],
+        #             starting_point
+        #         ), 2)
+        #     variant_potential_value /= len(starting_times)
+        #     potential_value += variant_potential_value
+        #     history.variant_potential_values[swap].append(float(variant_potential_value))
 
-        potential_value /= len(swaps)
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            futures = []
+            for variant_potential_result in variant_potential_results:
+                for starting_time in starting_times:
+                    futures.append(executor.submit(
+                        func,
+                        variant_potential_result[0],
+                        variant_potential_result[1],
+                        variant_potential_result[2],
+                        variant_potential_result[3],
+                        variant_potential_result[0].shape[0],
+                        starting_time
+                    ))
+            for future in concurrent.futures.as_completed(futures):
+                potential_value += future.result()
+
+        potential_value /= len(swaps) * len(starting_times)
         potential_value = round(potential_value, settings.DECIMAL_PLACES)
         history.potential_values.append(float(potential_value))
 

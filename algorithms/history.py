@@ -41,8 +41,8 @@ class History:
             for i in range(self.number_of_iterations):
                 f.write('iteration {iteration}\n'.format(iteration=i))
                 f.write('value {value}\nvariant '.format(value=self.potential_values[i]))
-                for swap, variant_potential_values in self.variant_potential_values.items():
-                    f.write('{swap} {value} '.format(swap=str(swap).replace(' ', ''), value=variant_potential_values[i]))
+                # for swap, variant_potential_values in self.variant_potential_values.items():
+                #     f.write('{swap} {value} '.format(swap=str(swap).replace(' ', ''), value=variant_potential_values[i]))
                 f.write('\n')
 
 
