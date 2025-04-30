@@ -36,7 +36,7 @@ def main() -> None:
         for i, (variant, scores) in enumerate(variant_potential_values.items()):
             counts, bins = np.histogram(scores, bins=tuple(set([int(score) for score in scores])))
             plt.stairs(counts, bins)
-            plt.hist(bins[:-1], bins, weights=counts, label=str(variant), edgecolor=COLORS[i], facecolor=COLORS[i], alpha=0.5)
+            plt.hist(bins[:-1], bins, weights=counts, label=str(variant), alpha=0.5)
         plt.xlabel(labels.VARIANT_DISTRIBUTION_X_LABEL)
         plt.ylabel(labels.VARIANT_DISTRIBUTION_Y_LABEL)
         plt.legend(loc='upper right')
@@ -44,7 +44,7 @@ def main() -> None:
     elif mode == 'variant_evolution':
         iterations = [i for i in range(len(potential_values))]
         for i, (variant, scores) in enumerate(variant_potential_values.items()):
-            plt.plot(iterations, scores, label=str(variant), color=COLORS[i], linewidth=0.5)
+            plt.plot(iterations, scores, label=str(variant), linewidth=0.5)
         plt.plot(iterations, potential_values, label=labels.VARIANT_EVOLUTION_AVERAGE_LABEL, color='k', linewidth=2)
         plt.xlabel(labels.VARIANT_EVOLUTION_X_LABEL)
         plt.ylabel(labels.VARIANT_EVOLUTION_Y_LABEL)
@@ -54,7 +54,7 @@ def main() -> None:
         limit = int(sys.argv[3])
         iterations = range(limit)
         for i, (variant, scores) in enumerate(variant_potential_values.items()):
-            plt.plot(iterations, scores[:limit], label=str(variant), color=COLORS[i], linewidth=0.5)
+            plt.plot(iterations, scores[:limit], label=str(variant), linewidth=0.5)
         plt.plot(iterations, potential_values[:limit], label=labels.VARIANT_EVOLUTION_AVERAGE_LABEL, color='k', linewidth=2)
         plt.xlabel(labels.VARIANT_EVOLUTION_X_LABEL)
         plt.ylabel(labels.VARIANT_EVOLUTION_Y_LABEL)
