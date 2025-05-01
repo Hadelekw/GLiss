@@ -10,11 +10,11 @@ from algorithms import simulated_annealing
 from load_file import load_graphml, load_atrp
 
 
-def main() -> None:
-    mode = sys.argv[1]
-    file_path = sys.argv[2]
-    results_path = sys.argv[3]
-    starting_times = sys.argv[4]
+def main(mode : str,
+         file_path : str,
+         results_path : str,
+         starting_times : str) -> None:
+
     starting_times = [float(value) for value in starting_times.split(',')]
 
     if mode == 'graphml':
@@ -46,4 +46,4 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
