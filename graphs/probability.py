@@ -18,12 +18,12 @@ def main() -> None:
     fig, axes = plt.subplots(ncols=2)
     axes[0].set_xlabel('Iteration number [n]')
     axes[0].set_ylabel('Temperature parameter value')
-    axes[0].set_title('(a)', fontsize=16)
-    axes[0].set_aspect(10)
+    # axes[0].set_title('(a)', fontsize=16)
+    axes[0].set_aspect(2000 / 100)
     axes[1].set_xlabel('Iteration number [n]')
     axes[1].set_ylabel('Solution acceptance probability')
-    axes[1].set_title('(b)', fontsize=16)
-    axes[1].set_aspect(1000)
+    # axes[1].set_title('(b)', fontsize=16)
+    axes[1].set_aspect(2000)
     x = range(sa_settings.NUMBER_OF_ITERATIONS)
     for style, function_identifier in zip(LINE_STYLES, FUNCTIONS):
         func = temperatures.TEMPERATURE_UPDATE_MAP[function_identifier]

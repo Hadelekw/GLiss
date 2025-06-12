@@ -32,7 +32,15 @@ def main() -> None:
 
     potential_values, variant_potential_values = load_values(file_path)
 
-    if mode == 'variant_distribution':
+    if mode == 'distribution':
+        counts, bins = np.histogram(potential_values, bins=tuple(set([int(value) for value in potential_values])))
+        plt.stairs(counts, bins)
+        plt.hist(bins[:-1], bins, weights=counts, label='Result', color='k')
+        plt.xlabel(labels.DISTRIBUTION_X_LABEL)
+        plt.ylabel(labels.DISTRIBUTION_Y_LABEL)
+        plt.legend(loc='upper right')
+
+    elif mode == 'variant_distribution':
         for i, (variant, scores) in enumerate(variant_potential_values.items()):
             counts, bins = np.histogram(scores, bins=tuple(set([int(score) for score in scores])))
             plt.stairs(counts, bins)

@@ -25,8 +25,24 @@ def erf(x) -> float:
     return func(x) if x > 0 else -func(-x)
 
 
+# def erf(x) -> float:
+#     def func(x) -> float:
+#         a1 = 0.0705230784
+#         a2 = 0.0422820123
+#         a3 = 0.0092705272
+#         a4 = 0.0001520143
+#         a5 = 0.0002765672
+#         a6 = 0.0000430638
+#         return 1 - 1 / ((1 + a1 * x + a2 * x**2 + a3 * x**3 + a4 * x**4 + a5 * x**5 + a6 * x**6))
+#     return func(x) if x > 0 else -func(x)
+
+
 def erfc(x) -> float:
     return 1 - erf(x)
+
+
+def get_reaction_time_probability(t : float) -> float:
+    return alt_emg(t, 4, 0.5, 1.5)
 
 
 def sample_reaction_times(n : int,
